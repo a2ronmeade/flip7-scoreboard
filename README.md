@@ -1,6 +1,4 @@
-Welcome to the grade-calculator wiki!
-
-This is a simple grade calculator for final grade calculation from HW, Quizzes, Midterms, and a Final
+Scoreboard for card game flip7
 
 Requires PyQt5:
 `python -m pip install PyQt5`
