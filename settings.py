@@ -7,7 +7,8 @@ class SettingsWindow(QWidget):
         super().__init__(flags=Qt.Window)
         self.setWindowTitle("Settings")
         self.resize(400, 300)
-
+        self.setStyleSheet(DARK_THEME)
+        
         self.main_window = main_window
 
         # default settings
