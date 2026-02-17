@@ -1,2 +1,12 @@
-# flip7-scoreboard
-Scoreboard for the card game flip7
+Welcome to the grade-calculator wiki!
+
+This is a simple grade calculator for final grade calculation from HW, Quizzes, Midterms, and a Final
+
+Requires PyQt5:
+`python -m pip install PyQt5`
+
+Clone the repo: `git clone https://github.com/a2ronmeade/flip7-scoreboard.git`
+
+Then Run: python '.\run.py'
+
+alpha 1.0: ability to add players, track total score over multiple rounds, choose between light/dark mode, as well as font size in settings. 
