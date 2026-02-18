@@ -1,6 +1,7 @@
+from email.mime import text
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-from themes import LIGHT_THEME, DARK_THEME
+from themes import LIGHT_THEME, DARK_THEME, SPRING_THEME, SUMMER_THEME, AUTUMN_THEME, WINTER_THEME
 
 class SettingsWindow(QWidget):
     def __init__(self, main_window=None):
@@ -23,10 +24,11 @@ class SettingsWindow(QWidget):
         theme_label = QLabel("Theme:")
         layout.addWidget(theme_label)
 
-        self.dark_mode_checkbox = QCheckBox("Dark Mode")
-        self.dark_mode_checkbox.setChecked(True)
-        self.dark_mode_checkbox.stateChanged.connect(self.update_theme)
-        layout.addWidget(self.dark_mode_checkbox)
+        self.theme_combo = QComboBox()
+        self.theme_combo.addItems(["Dark","Light","Spring","Summer","Autumn","Winter"])
+        self.theme_combo.setCurrentText(self.current_theme)
+        self.theme_combo.currentTextChanged.connect(self.update_theme)
+        layout.addWidget(self.theme_combo)
 
         # Winning Threshold
         threshold_layout = QHBoxLayout()
@@ -47,10 +49,14 @@ class SettingsWindow(QWidget):
         self.font_combo.currentTextChanged.connect(self.update_font)
         layout.addWidget(self.font_combo)
 
+        self.reset_button = QPushButton("Reset Game")
+        self.reset_button.clicked.connect(self.reset_game)
+        layout.addWidget(self.reset_button)
+
         layout.addStretch()
 
-    def update_theme(self, state):
-        self.current_theme = "Dark" if state == Qt.Checked else "Light"
+    def update_theme(self, text):
+        self.current_theme = text
 
     def update_font(self, text):
         self.font_size = text
@@ -58,10 +64,17 @@ class SettingsWindow(QWidget):
     def closeEvent(self, event):
         if self.main_window:
             # Apply theme
-            if self.current_theme == "Dark":
-                self.main_window.setStyleSheet(DARK_THEME)
-            else:
-                self.main_window.setStyleSheet(LIGHT_THEME)
+            theme_map = {
+                "Dark": DARK_THEME,
+                "Light": LIGHT_THEME,
+                "Spring": SPRING_THEME,
+                "Summer": SUMMER_THEME,
+                "Autumn": AUTUMN_THEME,
+                "Winter": WINTER_THEME,
+            }
+
+            selected_theme = theme_map.get(self.current_theme, DARK_THEME)
+            self.main_window.setStyleSheet(selected_theme)
 
             font_map = {"Regular": 30, "Large": 38, "Extra Large": 46}
             size = font_map.get(self.font_size, 30)
@@ -78,3 +91,7 @@ class SettingsWindow(QWidget):
                     self.main_window.WINNING_THRESHOLD = 200
 
         event.accept()
+
+    def reset_game(self):
+        if self.main_window:
+            self.main_window.reset_game()

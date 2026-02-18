@@ -6,8 +6,9 @@ from settings import SettingsWindow
 from themes import LIGHT_THEME, DARK_THEME
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, color):
         self.name = name
+        self.color = color
         self.total_score = 0
         self.round_score = 0
 
@@ -20,6 +21,7 @@ class Scoreboard(QMainWindow):
 
         self.players = []
         self.player_widgets = {}
+        self.current_starter_index = -1
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -42,8 +44,6 @@ class Scoreboard(QMainWindow):
         top_layout.addWidget(self.add_player_button)
         top_layout.addStretch()
 
-        
-
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         main_layout.addWidget(self.scroll_area)
@@ -60,13 +60,19 @@ class Scoreboard(QMainWindow):
     def add_player(self):
         name, ok = QInputDialog.getText(self, "Add Player", "Enter player name:")
         if ok and name:
-            player = Player(name)
-            self.players.append(player)
-            self.create_player_row(player)
+            color = QColorDialog.getColor()
+            if color.isValid():
+                player = Player(name, color.name())
+                self.players.append(player)
+                if len(self.players) == 1:
+                    self.current_starter_index = 0
+                self.create_player_row(player)
+                self.update_starter_display()
 
     def create_player_row(self, player):
         row = QHBoxLayout()
         name_label = QLabel(player.name)
+        name_label.setStyleSheet(f"color: {player.color};")
         name_label.setFixedWidth(150)
         row.addWidget(name_label)
 
@@ -81,11 +87,14 @@ class Scoreboard(QMainWindow):
         row.addWidget(round_input)
 
         self.player_layout.addLayout(row)
-        self.player_widgets[player] = (total_label, round_input)
+        self.player_widgets[player] = (name_label, total_label, round_input)
 
     def next_round(self):
+        if not self.players:
+            return
+        
         for player in self.players:
-            total_label, round_input = self.player_widgets[player]
+            _, total_label, round_input = self.player_widgets[player]
             try:
                 round_score = int(round_input.text())
             except ValueError:
@@ -94,9 +103,34 @@ class Scoreboard(QMainWindow):
             round_input.clear()
             total_label.setText(str(player.total_score))
 
+        self.current_starter_index += 1
+        if self.current_starter_index >= len(self.players):
+            self.current_starter_index = 0
+        self.update_starter_display()
+
     def open_settings(self):
         self.settings_window = SettingsWindow(main_window=self)
         self.settings_window.show()
+
+    def update_starter_display(self):
+        for i, player in enumerate(self.players):
+            name_label, _, _ = self.player_widgets[player]
+            if i == self.current_starter_index:
+                name_label.setStyleSheet(f"color: {player.color}; text-decoration: underline;")
+            else:
+                name_label.setStyleSheet(f"color: {player.color}; text-decoration: none;")
+
+    def reset_game(self):
+        for player in self.players:
+            player.total_score = 0
+
+            name_label, total_label, round_input = self.player_widgets[player]
+            total_label.setText("0")
+            round_input.clear()
+
+        self.current_starter_index = 0 if self.players else -1
+        self.update_starter_display()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
